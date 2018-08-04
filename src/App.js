@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import * as p5 from 'p5'
+import initReactFastclick from "react-fastclick";
 import './App.css'
 
 class App extends Component {
@@ -28,6 +29,8 @@ class App extends Component {
     this.over = this.over.bind(this)
   }
   componentDidMount() {
+    initReactFastclick()
+    
     new p5((p) => {
       this.painter = p;
       p.setup = this.setup
