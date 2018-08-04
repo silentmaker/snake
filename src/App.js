@@ -7,7 +7,8 @@ class App extends Component {
     super(props)
 
     this.painter = null
-    this.columns = 40
+    this.width = Math.min(window.innerWidth, window.innerHeight, 600)
+    this.columns = 36
     this.snake = {
       x: 1,
       y: 1,
@@ -18,7 +19,7 @@ class App extends Component {
     }
     this.food = {x: 0, y: 0}
     this.orientation = ''
-    this.gridSize = 0
+    this.gridSize = this.width / this.columns
 
     this.setup = this.setup.bind(this)
     this.draw = this.draw.bind(this)
@@ -27,11 +28,6 @@ class App extends Component {
     this.over = this.over.bind(this)
   }
   componentDidMount() {
-    const {innerWidth, innerHeight} = window
-    
-    this.gridSize = Math.min(innerWidth, innerHeight) / this.columns
-    this.orientation= innerHeight > innerWidth ? 'portrait' : 'landscape'
-
     new p5((p) => {
       this.painter = p;
       p.setup = this.setup
@@ -42,40 +38,38 @@ class App extends Component {
   }
   setup() {
     this.painter.frameRate(8)
-    this.painter.createCanvas(window.innerWidth, window.innerWidth)
+    this.painter.createCanvas(this.width, this.width)
     this.createFood()
   }
   draw() {
     const {painter, snake, food, gridSize, columns} = this
-   
-    painter.background(0)
+    const nextX = snake.x + snake.xspeed
+    const nextY = snake.y + snake.yspeed
 
-    snake.bodies.unshift({x: snake.x, y: snake.y})
-    if (snake.bodies.length < snake.length) {
-      snake.bodies.pop()
-    }
+    if (nextX < 0 || nextY < 0 || nextX >= columns || nextY >= columns) this.over()
 
-    const x = snake.x + snake.xspeed
-    const y = snake.y + snake.yspeed
-    if (x < 0 || y < 0 || x >= columns || y >= columns) {
-      this.over()
-    } else {
-      snake.x = x
-      snake.y = y
-    }
-    painter.fill(255)
+    painter.background('#E2E1DD')
+    painter.fill('#3D9DA5')
     painter.rect(snake.x * gridSize, snake.y * gridSize, gridSize, gridSize)
-    for (let i = 0; i < snake.length; i++) {
+    for (let i = 0; i < snake.bodies.length; i++) {
+      if (nextX === snake.bodies[i].x && nextY === snake.bodies[i].y) this.over()
       painter.rect(snake.bodies[i].x * gridSize, snake.bodies[i].y * gridSize, gridSize, gridSize)
     }
-
+    painter.fill('#BB7F3B')
+    painter.rect(food.x * gridSize, food.y * gridSize, gridSize, gridSize)
 
     if (snake.x === food.x && snake.y === food.y) {
       snake.length += 1
       this.createFood()
     }
-    painter.fill('red')
-    painter.rect(food.x * gridSize, food.y * gridSize, gridSize, gridSize)
+
+    snake.bodies.unshift({x: snake.x, y: snake.y})
+    if (snake.bodies.length > snake.length) {
+      snake.bodies.pop()
+    }
+
+    snake.x = nextX
+    snake.y = nextY
   }
   createFood() {
     const {painter, food, columns} = this
@@ -120,16 +114,17 @@ class App extends Component {
     document.onkeydown = null
   }
   render() {
-    const {turn} = this;
+    const {turn, width} = this;
+    const containerStyle = {width: width + 'px'}
 
     return (
       <div>
-        <div id="snake-game"></div>
+        <div id="snake-game" style={containerStyle}></div>
         <div id="controls">
-          <div className="control up" onClick={() => turn('up')}>上</div>
-          <div className="control left" onClick={() => turn('left')}>左</div>
-          <div className="control right" onClick={() => turn('right')}>右</div>
-          <div className="control down" onClick={() => turn('down')}>下</div>
+          <div className="control up" onClick={() => turn('up')}></div>
+          <div className="control left" onClick={() => turn('left')}></div>
+          <div className="control right" onClick={() => turn('right')}></div>
+          <div className="control down" onClick={() => turn('down')}></div>
         </div>
       </div>
     )
