@@ -3,21 +3,24 @@ import * as p5 from 'p5'
 import initReactFastclick from "react-fastclick";
 import './App.css'
 
+const defaultSnake = () => ({
+  x: 1,
+  y: 1,
+  xspeed: 1,
+  yspeed: 0,
+  bodies: [],
+  length: 0
+})
+
 class App extends Component {
   constructor(props) {
     super(props)
 
+    this.state = { isOver: false }
     this.painter = null
     this.width = Math.min(window.innerWidth, window.innerHeight, 600)
     this.columns = 36
-    this.snake = {
-      x: 1,
-      y: 1,
-      xspeed: 1,
-      yspeed: 0,
-      bodies: [],
-      length: 0
-    }
+    this.snake = defaultSnake()
     this.food = {x: 0, y: 0}
     this.orientation = ''
     this.gridSize = this.width / this.columns
@@ -27,10 +30,11 @@ class App extends Component {
     this.keyPressed = this.keyPressed.bind(this)
     this.turn = this.turn.bind(this)
     this.over = this.over.bind(this)
+    this.restart = this.restart.bind(this)
   }
   componentDidMount() {
     initReactFastclick()
-    
+
     new p5((p) => {
       this.painter = p;
       p.setup = this.setup
@@ -40,7 +44,7 @@ class App extends Component {
     document.onkeydown = this.keyPressed
   }
   setup() {
-    this.painter.frameRate(8)
+    this.painter.frameRate(10)
     this.painter.createCanvas(this.width, this.width)
     this.createFood()
   }
@@ -112,23 +116,36 @@ class App extends Component {
   }
   over() {
     this.painter.noLoop()
+    this.setState({ isOver: true })
+  }
+  restart() {
+    this.snake = defaultSnake()
+    this.painter.loop()
+    this.setState({ isOver: false })
   }
   componentWillUnmount() {
     document.onkeydown = null
   }
   render() {
-    const {turn, width} = this;
+    const {turn, width, restart} = this
+    const {isOver} = this.state
     const containerStyle = {width: width + 'px'}
 
     return (
       <div>
         <div id="snake-game" style={containerStyle}></div>
+        {isOver ? 
+        <div id="game-over">
+          <div className="over">GAME OVER!</div>
+          <div className="restart" onClick={restart}>RESTART</div>
+        </div> :  
         <div id="controls">
           <div className="control up" onClick={() => turn('up')}></div>
           <div className="control left" onClick={() => turn('left')}></div>
           <div className="control right" onClick={() => turn('right')}></div>
           <div className="control down" onClick={() => turn('down')}></div>
         </div>
+        }
       </div>
     )
   }
