@@ -86,7 +86,7 @@ class App extends Component {
   }
   keyPressed(e) {
     const {turn} = this;
-
+    window.navigator.vibrate(200);
     switch (e.keyCode) {
       case 38:
         turn('up')
