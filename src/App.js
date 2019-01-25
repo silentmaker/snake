@@ -24,6 +24,8 @@ class App extends Component {
     this.food = {x: 0, y: 0}
     this.orientation = ''
     this.gridSize = this.width / this.columns
+    this.speedLevel = 8
+    this.speedCount = 0
 
     this.setup = this.setup.bind(this)
     this.draw = this.draw.bind(this)
@@ -44,11 +46,18 @@ class App extends Component {
     document.onkeydown = this.keyPressed
   }
   setup() {
-    this.painter.frameRate(10)
+    this.painter.frameRate(60)
     this.painter.createCanvas(this.width, this.width)
     this.createFood()
   }
   draw() {
+    if (this.speedCount < this.speedLevel) {
+      this.speedCount += 1;
+      return;
+    } else {
+      this.speedCount = 0;
+    }
+
     const {painter, snake, food, gridSize, columns} = this
     const nextX = snake.x + snake.xspeed
     const nextY = snake.y + snake.yspeed
@@ -67,6 +76,7 @@ class App extends Component {
 
     if (snake.x === food.x && snake.y === food.y) {
       snake.length += 1
+      if (this.speedLevel > 2) this.speedLevel -= 1
       this.createFood()
     }
 
@@ -86,7 +96,7 @@ class App extends Component {
   }
   keyPressed(e) {
     const {turn} = this;
-    window.navigator.vibrate(200);
+    window.navigator.vibrate([200]);
     switch (e.keyCode) {
       case 38:
         turn('up')
