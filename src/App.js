@@ -96,25 +96,27 @@ class App extends Component {
   }
   keyPressed(e) {
     const {turn} = this;
-    window.navigator.vibrate([200]);
+    window.navigator.vibrate([200])
     switch (e.keyCode) {
       case 38:
-        turn('up')
+        turn(e, 'up')
         break
       case 40:
-        turn('down')
+        turn(e, 'down')
         break
       case 37:
-        turn('left')
+        turn(e, 'left')
         break
       case 39:
-        turn('right')
+        turn(e, 'right')
         break
       default:
         break
     }
   }
-  turn(dir) {
+  turn(e, dir) {
+    if (e.type === 'click' && 'ontouchstart' in document.documentElement) return;
+    e.stopPropagation();
     const {snake} = this
     const xspeed = dir === 'left' ? -1 : (dir === 'right' ? 1 : 0)
     const yspeed = dir === 'up' ? -1 : (dir === 'down' ? 1 : 0)
@@ -126,10 +128,13 @@ class App extends Component {
   }
   over() {
     this.painter.noLoop()
+    window.navigator.vibrate([200])
     this.setState({ isOver: true })
   }
   restart() {
     this.snake = defaultSnake()
+    this.speedLevel = 8
+    this.speedCount = 0
     this.painter.loop()
     this.setState({ isOver: false })
   }
@@ -150,10 +155,18 @@ class App extends Component {
           <div className="restart" onClick={restart}>RESTART</div>
         </div> :  
         <div id="controls">
-          <div className="control up" onClick={() => turn('up')}></div>
-          <div className="control left" onClick={() => turn('left')}></div>
-          <div className="control right" onClick={() => turn('right')}></div>
-          <div className="control down" onClick={() => turn('down')}></div>
+          <div className="control up"
+            onTouchStart={(e) => turn(e, 'up')}
+            onClick={(e) => turn(e, 'up')}></div>
+          <div className="control left"
+            onTouchStart={(e) => turn(e, 'left')}
+            onClick={(e) => turn(e, 'left')}></div>
+          <div className="control right"
+            onTouchStart={(e) => turn(e, 'right')}
+            onClick={(e) => turn(e, 'right')}></div>
+          <div className="control down"
+            onTouchStart={(e) => turn(e, 'down')}
+            onClick={(e) => turn(e, 'down')}></div>
         </div>
         }
       </div>
